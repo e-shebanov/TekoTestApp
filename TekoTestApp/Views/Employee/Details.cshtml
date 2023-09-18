@@ -1,0 +1,196 @@
+﻿@model TekoTestApp.ViewModels.EmployeeDetailsViewModel
+
+<h2>Информация о сотруднике</h2>
+
+<table class="table">
+    <tr>
+        <th>Имя</th>
+        <td>@Model.Employee.FullName</td>
+    </tr>
+    <tr>
+        <th>Должность</th>
+        <td>@Model.Employee.Position</td>
+    </tr>
+    <tr>
+        <th>Возраст</th>
+        <td>@Model.Employee.Age</td>
+    </tr>
+</table>
+
+<div style="margin-bottom: 40px;"></div>
+
+<h2>Добавить новый отпуск</h2>
+
+@using (Html.BeginForm("Create", "Vacation", FormMethod.Post))
+{
+    @Html.ValidationSummary(true)
+
+    <div class="form-group">
+        @Html.HiddenFor(model => model.NewVacation.Employee.Id)
+        @Html.HiddenFor(model => model.NewVacation.Employee.FullName)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.NewVacation.StartDate)
+        @Html.EditorFor(model => model.NewVacation.StartDate, new { htmlAttributes = new { @class = "form-control", @Value = DateTime.Now.ToShortDateString() } })
+        @Html.ValidationMessageFor(model => model.NewVacation.StartDate)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.NewVacation.EndDate)
+        @Html.EditorFor(model => model.NewVacation.EndDate, new { htmlAttributes = new { @class = "form-control", @Value = DateTime.Now.AddDays(14).ToShortDateString() } })
+        @Html.ValidationMessageFor(model => model.NewVacation.EndDate)
+    </div>
+
+    <div style="margin-bottom: 20px;"></div>
+    <div class="form-group">
+        <input type="submit" value="Добавить" class="btn btn-primary" />
+    </div>
+}
+
+
+<div style="margin-bottom: 20px;"></div>
+<h2>Отпуски</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Дата начала</th>
+            <th>Дата окончания</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var vacation in Model.Vacations)
+        {
+            <tr>
+                <td>@vacation.StartDate.ToShortDateString()</td>
+                <td>@vacation.EndDate.ToShortDateString()</td>
+                <td>
+                    @using (Html.BeginForm("DeleteVacation", "Vacation", new { vacationId = vacation.Id }, FormMethod.Post, new { onsubmit = "return confirm('Вы уверены, что хотите удалить этот отпуск?');" }))
+                    {
+                        @Html.Hidden("employeeId", Model.Employee.Id)
+                        <button type="submit" class="btn btn-danger">Удалить</button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div style="margin-bottom: 40px;"></div>
+<h2>Пересечение отпуска с сотрудниками моего отдела. Сотрудники моложе 30 лет.</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Сотрудник</th>
+            <th>Возраст</th>
+            <th>Должность</th>
+            <th>Отпуск</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var intersectingEmployee in Model.IntersectionFromMyDepYounger30.Employees)
+        {
+            <tr>
+                <td>@intersectingEmployee.FullName</td>
+                <td>@intersectingEmployee.Age</td>
+                <td>@intersectingEmployee.Position</td>
+                <td>
+                    @foreach (var intersectingVacation in Model.IntersectionFromMyDepYounger30.Vacations.Where(v => v.Employee.Id == intersectingEmployee.Id))
+                    {
+                        <text>@intersectingVacation.StartDate.ToShortDateString() - @intersectingVacation.EndDate.ToShortDateString()</text>
+                        <br />
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div style="margin-bottom: 40px;"></div>
+<h2>Пересечение отпуска с сотрудниками-женщинами не из моего отдела. Возраст сотрудников - старше 30, но моложе 50.</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Сотрудник</th>
+            <th>Возраст</th>
+            <th>Должность</th>
+            <th>Отпуск</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var intersectingEmployee in Model.Between30and50FemaleNotMyDep.Employees)
+        {
+            <tr>
+                <td>@intersectingEmployee.FullName</td>
+                <td>@intersectingEmployee.Age</td>
+                <td>@intersectingEmployee.Position</td>
+                <td>
+                    @foreach (var intersectingVacation in Model.Between30and50FemaleNotMyDep.Vacations.Where(v => v.Employee.Id == intersectingEmployee.Id))
+                    {
+                        <text>@intersectingVacation.StartDate.ToShortDateString() - @intersectingVacation.EndDate.ToShortDateString()</text>
+                        <br />
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div style="margin-bottom: 40px;"></div>
+<h2>Пересечение отпуска с сотрудниками из любого отдела. Возраст сотрудников - старше 50 лет.</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Сотрудник</th>
+            <th>Возраст</th>
+            <th>Должность</th>
+            <th>Отпуск</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var intersectingEmployee in Model.Older50AnyDep.Employees)
+        {
+            <tr>
+                <td>@intersectingEmployee.FullName</td>
+                <td>@intersectingEmployee.Age</td>
+                <td>@intersectingEmployee.Position</td>
+                <td>
+                    @foreach (var intersectingVacation in Model.Older50AnyDep.Vacations.Where(v => v.Employee.Id == intersectingEmployee.Id))
+                    {
+                        <text>@intersectingVacation.StartDate.ToShortDateString() - @intersectingVacation.EndDate.ToShortDateString()</text>
+                        <br />
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div style="margin-bottom: 40px;"></div>
+<h2>Отпуска без пересечения.</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Сотрудник</th>
+            <th>Возраст</th>
+            <th>Должность</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var intersectingEmployee in Model.NotIntersection.Employees)
+        {
+            <tr>
+                <td>@intersectingEmployee.FullName</td>
+                <td>@intersectingEmployee.Age</td>
+                <td>@intersectingEmployee.Position</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

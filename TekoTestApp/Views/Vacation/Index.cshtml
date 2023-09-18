@@ -1,0 +1,23 @@
+﻿@model TekoTestApp.ViewModels.VacationViewModel
+<h2>Список отпусков</h2>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Имя сотрудника</th>
+            <th>Дата начала</th>
+            <th>Дата окончания</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var vacation in Model.Vacations)
+        {
+            <tr>
+                <td>@vacation.Employee.FullName</td>
+                <td>@vacation.StartDate.ToShortDateString()</td>
+                <td>@vacation.EndDate.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>
